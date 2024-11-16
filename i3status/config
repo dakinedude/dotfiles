@@ -1,0 +1,26 @@
+general {
+    colors = true
+    interval = 5
+}
+
+order += "wireless _first_"
+order += "battery all"
+order += "memory"
+order += "time"
+
+wireless _first_ {
+        format_up = "%quality at %essid"
+        format_down = "W: down"
+}
+
+battery all {
+        format = "%status %percentage %remaining"
+}
+
+memory {
+    format = "%used / %total"
+}
+
+time {
+    format = "%d/%m/%Y %H:%M:%S"
+}
