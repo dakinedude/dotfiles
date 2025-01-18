@@ -1,28 +1,94 @@
 (setq custom-file "~/.config/emacs/custom.el")
 (load custom-file)
 
+(setq evil-want-keybinding nil)
+
 (require 'package)
-(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+(setq package-archives '(("melpa" . "https://melpa.org/packages/")
+                          ("gnu" . "https://elpa.gnu.org/packages/")
+                          ("nongnu" . "https://elpa.nongnu.org/nongnu/")))
 (package-initialize)
 
+(unless package-archive-contents
+  (package-refresh-contents))
+
+(unless (package-installed-p 'use-package)
+  (package-install 'use-package))
+
 (require 'use-package)
+(setq use-package-always-ensure t)
 
-;; evil jj
-(with-eval-after-load 'evil
-  (define-key evil-insert-state-map (kbd "j") 
-    (lambda ()
-      (interactive)
-      (let ((next-char (read-key "j")))
-        (if (equal next-char ?j)
-            (evil-normal-state)
-          (insert "j" (string next-char))))))
-  )
+;; Packages
+(use-package exec-path-from-shell
+  :config
+  (exec-path-from-shell-initialize))
 
-;; ido mode
-(ido-mode 1)
-(setq ido-everywhere t)
-(setq ido-create-new-buffer 'always)
+(use-package lsp-mode
+  :hook ((go-mode . lsp-deferred))
+  :init
+  (setq lsp-auto-guess-root t))
 
+(use-package lsp-ui
+  :after lsp-mode
+  :hook (lsp-mode . lsp-ui-mode)
+  :init
+  (setq lsp-ui-doc-enable t
+        lsp-ui-doc-delay 2
+        lsp-ui-doc-position 'at-point
+        lsp-ui-sideline-enable nil
+        lsp-ui-sideline-show-diagnostics t
+        lsp-ui-sideline-show-code-actions t))
+
+(use-package magit)
+
+(use-package evil
+  :config
+  (evil-mode 1))
+
+(use-package evil-collection
+  :after evil
+  :config
+  (evil-collection-init))
+
+(use-package vertico
+  :init
+  (vertico-mode))
+
+(use-package savehist
+  :init
+  (savehist-mode))
+
+(use-package maude-mode)
+
+(use-package marginalia
+  :bind (:map minibuffer-local-map
+         ("M-A" . marginalia-cycle))
+  :init
+  (marginalia-mode))
+
+(use-package avy)
+(global-set-key (kbd "C-;") 'avy-goto-char)
+(global-set-key (kbd "C-'") 'avy-goto-char-2)
+
+(use-package maude-mode)
+(autoload 'maude-mode "maude-mode" "Major mode for editing Maude code" t)
+(add-to-list 'auto-mode-alist '("\\.maude\\'" . maude-mode))
+
+;; Configure comint
+(add-hook 'shell-mode-hook 'my/shell-setup)
+(add-hook 'evil-insert-state-entry-hook 'my/shell-move-to-prompt)
+
+(defun my/shell-setup ()
+  "Set shell buffer to read-only except for the prompt."
+  (setq comint-prompt-read-only t)  ;; readonly
+  (setq-local scroll-conservatively 101)  ;; autoscroll
+  (add-hook 'comint-preoutput-filter-functions
+            'ansi-color-apply nil t))  ;; color
+
+(defun my/shell-move-to-prompt ()
+  "Automatically move cursor to prompt line in shell mode."
+  (when (derived-mode-p 'shell-mode)
+    (goto-char (process-mark (get-buffer-process (current-buffer))))))
 
 ;; shell and compilation on bottom v
 (setq display-buffer-alist
@@ -45,7 +111,7 @@
                         (delq 'process-kill-buffer-query-function
                               kill-buffer-query-functions))))
 
-;; switch buffers clockwise
+;; Custom Functions
 (defun switch-buffer-clockwise ()
   "Switch to the next buffer in a clockwise manner."
   (interactive)
@@ -55,34 +121,20 @@
     (select-window (car windows))
     (other-window 1)))
 
-;; shell shortcut
-(global-set-key (kbd "C-`") 'shell)
+(defun my-java-compile ()
+  "Compile the current Java file."
+  (interactive)
+  (let ((compile-command (concat "javac " (buffer-file-name))))
+    (compile compile-command)))
 
-;; use C-tab for clockwise switch
-(global-set-key (kbd "C-<tab>") 'switch-buffer-clockwise)
+(defun my-java-run ()
+  "Run the compiled Java class."
+  (interactive)
+  (let ((class-name (file-name-sans-extension (file-name-nondirectory buffer-file-name))))
+    (compile (concat "java " class-name))))
 
-;; Add ~/.config/emacs/lisp to the load-path
-(add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
-
-;; Autoload maude-mode
-(autoload 'maude-mode "maude-mode" "Major mode for editing Maude code" t)
-
-;; Associate .maude files with maude-mode
-(add-to-list 'auto-mode-alist '("\\.maude\\'" . maude-mode))
-
-;; backup folder
-(setq make-backup-files t)
-(setq backup-directory-alist '(("." . "~/.emacsbackups")))
-(setq backups-by-copying t)
-(setq delete-old-versions t
-      kept-new-versions 2
-      kept-old-versions 2)
-
-;; font
-(add-to-list 'default-frame-alist
-	     '(font . "Source Code Pro-16"))
-
-(evil-mode 1)
+;; Configurations
+(electric-pair-mode 1)
 (menu-bar-mode -1)
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
@@ -95,113 +147,91 @@
               auto-save-default nil
               indent-tabs-mode nil)
 
-;; default dir when opening emacs
-(setq default-directory "~/")
-(setq initial-buffer-choice (lambda () (dired default-directory)))
-;; JAVA
-(defun my-java-compile ()
-  "Compile the current Java file."
-  (interactive)
-  ;; Save only the current buffer without prompting for unrelated buffers...
-  (setq compilation-save-buffers-predicate 'ignore)
-  (let ((compile-command (concat "javac " (buffer-file-name))))
-    (compile compile-command)))
-
-(defun my-java-run ()
-  "Run the compiled Java class."
-  (interactive)
-  ;; Save only the current buffer without prompting for unrelated buffers....
-  (let ((class-name (file-name-sans-extension (file-name-nondirectory buffer-file-name))))
-    (compile (concat "java " class-name))))
-
-;; Keybindings for quick compile and run
+;; Keybindings
+(global-set-key (kbd "C-`") 'shell)
+(global-set-key (kbd "C-<tab>") 'switch-buffer-clockwise)
+(global-set-key (kbd "C-c e") 'lsp-ui-doc-show)
+(global-set-key (kbd "C-2") 'next-buffer)
+(global-set-key (kbd "C-1") 'previous-buffer)
 (add-hook 'java-mode-hook
           (lambda ()
             (local-set-key (kbd "C-c C-c") 'my-java-compile)
             (local-set-key (kbd "C-c C-r") 'my-java-run)))
 
-;; org tab cycle
+;; Backup Settings
+(setq make-backup-files t
+      backup-directory-alist '(("." . "~/.emacsbackups"))
+      backups-by-copying t
+      delete-old-versions t
+      kept-new-versions 2
+      kept-old-versions 2)
+
+;; Default Directory
+(setq default-directory "~/"
+      initial-buffer-choice (lambda () (dired default-directory)))
+
+;; Fonts
+(add-to-list 'default-frame-alist '(font . "Source Code Pro-16"))
+
+;; Org-Mode
 (with-eval-after-load 'org
   (define-key org-mode-map (kbd "C-c C-t") 'org-cycle))
 
-;; omit dotfiles in dired
+;; Dired Settings
 (require 'dired-x)
-
 (setq dired-omit-files
-      (rx (or (seq bol (? ".") "#")     ;; Emacs autosave files
-              (seq bol "." (not (any "."))) ;; Dot-files
-              (seq "~" eol)             ;; Backup files
-              (seq bol "CVS" eol))))    ;; CVS directorie
+      (rx (or (seq bol (? ".") "#")
+              (seq bol "." (not (any ".")))
+              (seq "~" eol)
+              (seq bol "CVS" eol))))
 
 (add-hook 'dired-mode-hook
           (lambda ()
-            (dired-omit-mode 1)))       ;; Automatically enable omit mode in dired
+            (dired-omit-mode 1)))
 
-(global-set-key (kbd "C-2") 'next-buffer)
-(global-set-key (kbd "C-1") 'previous-buffer)
+(with-eval-after-load 'dired
+  (define-key dired-mode-map (kbd "<return>") 'dired-find-alternate-file)
+  (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file))
 
-;; go mode
-(add-to-list 'auto-mode-alist '("\\.go\\'" . go-mode))
+;; Miscellaneous
+(setq confirm-kill-processes nil
+      message-log-max nil
+      initial-scratch-message nil
+      inhibit-startup-message t)
 
-(use-package exec-path-from-shell
-  :ensure t
-  :config
-  (exec-path-from-shell-initialize))
-
-;; lsp
-(use-package lsp-mode
-  :ensure t
-  :init
-  (setq lsp-auto-guess-root t)
-  :hook
-  (go-mode . lsp-deferred)   
-  :commands lsp)
-
-(use-package lsp-ui
-  :ensure t
-  :after lsp-mode
-  :hook (lsp-mode . lsp-ui-mode)
-  :init
-  (setq lsp-ui-doc-enable t                
-        lsp-ui-doc-delay 2                
-        lsp-ui-doc-position 'at-point        
-        lsp-ui-sideline-enable nil              
-        lsp-ui-sideline-show-diagnostics t
-        lsp-ui-sideline-show-hover nil
-        lsp-eldoc-enable-hover nil
-        lsp-ui-sideline-show-code-actions t))
-
-(electric-pair-mode 1)
-(global-set-key (kbd "C-c e") 'lsp-ui-doc-show)
-
-;; Remove messages from the *Messages* buffer.
-(setq-default message-log-max nil)
-
-;; kill that shit
-(setq initial-scratch-message nil) ;; empty scratch
-(setq inhibit-startup-message t)
 (kill-buffer "*Messages*")
 
-(use-package comint
-  :hook
-  ((shell-mode . my/shell-setup)
-   (evil-insert-state-entry . my/shell-move-to-prompt))
-  :config
-  (defun my/shell-setup ()
-    "Set shell buffer to read-only except for the prompt."
-    (setq comint-prompt-read-only t)  ;; readonly
-    (setq-local scroll-conservatively 101)  ;; autoscroll
-    (add-hook 'comint-preoutput-filter-functions
-              'ansi-color-apply nil t))  ;; color
+;; ido mode
+(ido-mode 1)
+(setq ido-everywhere t)
+(setq ido-create-new-buffer 'always)
+(setq ido-enable-flex-matching t)
 
-  ;; insert mode moves to prompt line
-  (defun my/shell-move-to-prompt ()
-    "Automatically move cursor to prompt line in shell mode."
-    (when (derived-mode-p 'shell-mode)
-      (goto-char (process-mark (get-buffer-process (current-buffer)))))))
+;; Scratch Buffer
+(defvar scratch-file (expand-file-name "scratch.txt" user-emacs-directory))
 
-(use-package evil
-  :config
-  (add-hook 'evil-insert-state-entry-hook 'my/shell-move-to-prompt))
+(defun save-scratch-buffer ()
+  "Save the content of the *scratch* buffer to a file."
+  (when (get-buffer "*scratch*")
+    (with-current-buffer "*scratch*"
+      (write-region (point-min) (point-max) scratch-file))))
 
-(setq confirm-kill-processes nil)
+(defun load-scratch-buffer ()
+  "Load the content of the *scratch* buffer from a file."
+  (when (file-exists-p scratch-file)
+    (with-current-buffer (get-buffer-create "*scratch*")
+      (insert-file-contents scratch-file))))
+
+(add-hook 'kill-emacs-hook 'save-scratch-buffer)
+(add-hook 'emacs-startup-hook 'load-scratch-buffer)
+
+;; JJ for Evil Mode
+(with-eval-after-load 'evil
+  (define-key evil-insert-state-map (kbd "j")
+    (lambda ()
+      (interactive)
+      (let ((next-char (read-key "j")))
+        (if (equal next-char ?j)
+            (evil-normal-state)
+          (insert "j" (string next-char)))))))
+(put 'dired-find-alternate-file 'disabled nil)
