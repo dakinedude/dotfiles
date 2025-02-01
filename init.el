@@ -19,57 +19,59 @@
 (setq use-package-always-ensure t)
 
 ;; Packages
-(use-package exec-path-from-shell
-  :config
-  (exec-path-from-shell-initialize))
+;; Replace use-package with manual configurations
 
-(use-package lsp-mode
-  :hook ((go-mode . lsp-deferred))
-  :init
-  (setq lsp-auto-guess-root t))
+;; exec-path-from-shell
+(require 'exec-path-from-shell)
+(exec-path-from-shell-initialize)
 
-(use-package lsp-ui
-  :after lsp-mode
-  :hook (lsp-mode . lsp-ui-mode)
-  :init
-  (setq lsp-ui-doc-enable t
-        lsp-ui-doc-delay 2
-        lsp-ui-doc-position 'at-point
-        lsp-ui-sideline-enable nil
-        lsp-ui-sideline-show-diagnostics t
-        lsp-ui-sideline-show-code-actions t))
+;; lsp-mode
+(require 'lsp-mode)
+(add-hook 'go-mode-hook #'lsp-deferred)
+(setq lsp-auto-guess-root t)
 
-(use-package magit)
+;; lsp-ui
+(require 'lsp-ui)
+(add-hook 'lsp-mode-hook #'lsp-ui-mode)
+(setq lsp-ui-doc-enable t
+      lsp-ui-doc-delay 2
+      lsp-ui-doc-position 'at-point
+      lsp-ui-sideline-enable nil
+      lsp-ui-sideline-show-diagnostics t
+      lsp-ui-sideline-show-code-actions t)
 
-(use-package evil
-  :config
-  (evil-mode 1))
+;; magit
+(require 'magit)
 
-(use-package evil-collection
-  :after evil
-  :config
-  (evil-collection-init))
+;; evil
+(require 'evil)
+(evil-mode 1)
 
-(use-package vertico
-  :init
-  (vertico-mode))
+;; evil-collection
+(require 'evil-collection)
+(evil-collection-init)
 
-(use-package savehist
-  :init
-  (savehist-mode))
+;; vertico
+(require 'vertico)
+(vertico-mode)
 
-(use-package maude-mode)
+;; savehist
+(require 'savehist)
+(savehist-mode)
 
-(use-package marginalia
-  :bind (:map minibuffer-local-map
-         ("M-A" . marginalia-cycle))
-  :init
-  (marginalia-mode))
+;; maude-mode
+(require 'maude-mode)
 
-(use-package avy)
+;; marginalia
+(require 'marginalia)
+(define-key minibuffer-local-map (kbd "M-A") 'marginalia-cycle)
+(marginalia-mode)
+
+;; avy
+(require 'avy)
 (global-set-key (kbd "C-;") 'avy-goto-char-timer)
 
-(use-package maude-mode)
+;; maude-mode
 (autoload 'maude-mode "maude-mode" "Major mode for editing Maude code" t)
 (add-to-list 'auto-mode-alist '("\\.maude\\'" . maude-mode))
 
@@ -196,19 +198,6 @@
 (with-eval-after-load 'dired
   (define-key dired-mode-map (kbd "<return>") 'dired-find-alternate-file)
   (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file))
-
-;; (defun my/dired-open-current-buffer-directory ()
-;;   "Open Dired in the directory of the current buffer's file."
-;;   (interactive)
-;;   (let ((current-directory (if buffer-file-name
-;;                                (file-name-directory buffer-file-name)
-;;                              default-directory)))
-;;     (dired current-directory)))
-
-;; ;; Bind the new function to C-x d
-;; (global-set-key (kbd "C-x d") 'my/dired-open-current-buffer-directory)
-
-
 
 ;; msc
 (setq confirm-kill-processes nil
