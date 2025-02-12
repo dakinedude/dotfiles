@@ -5,8 +5,8 @@
 
 (require 'package)
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
-                          ("gnu" . "https://elpa.gnu.org/packages/")
-                          ("nongnu" . "https://elpa.nongnu.org/nongnu/")))
+                         ("gnu" . "https://elpa.gnu.org/packages/")
+                         ("nongnu" . "https://elpa.nongnu.org/nongnu/")))
 (package-initialize)
 
 (unless package-archive-contents
@@ -94,7 +94,7 @@
       '(("\\*shell\\*\\|\\*compilation\\*\\|\\*Maude\\*"
          (display-buffer-reuse-window display-buffer-in-side-window)
          (side . bottom)
-         (window-height . 0.20))))
+         (window-height . 0.23))))
 
 ;; always kill shell without asking
 (add-hook 'shell-mode-hook
@@ -144,6 +144,7 @@
 (scroll-bar-mode -1)
 (global-display-line-numbers-mode)
 
+
 (setq-default tab-width 4
               fill-column 79
               truncate-lines t
@@ -155,12 +156,16 @@
 (global-set-key (kbd "C-`") 'shell)
 (global-set-key (kbd "C-<tab>") 'switch-buffer-clockwise)
 (global-set-key (kbd "C-c e") 'lsp-ui-doc-show)
-(global-set-key (kbd "C-2") 'next-buffer)
-(global-set-key (kbd "C-1") 'previous-buffer)
+;; (global-set-key (kbd "C-2") 'next-buffer)
+;; (global-set-key (kbd "C-1") 'previous-buffer)
 (add-hook 'java-mode-hook
           (lambda ()
             (local-set-key (kbd "C-c C-c") 'my-java-compile)
             (local-set-key (kbd "C-c C-r") 'my-java-run)))
+(global-set-key (kbd "<C-up>") 'shrink-window)
+(global-set-key (kbd "<C-down>") 'enlarge-window)
+(global-set-key (kbd "<C-left>") 'shrink-window-horizontally)
+(global-set-key (kbd "<C-right>") 'enlarge-window-horizontally)
 
 ;; Backup Settings
 (setq make-backup-files t
@@ -193,9 +198,9 @@
           (lambda ()
             (dired-omit-mode 1)))
 
-(with-eval-after-load 'dired
-  (define-key dired-mode-map (kbd "<return>") 'dired-find-alternate-file)
-  (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file))
+;; (with-eval-after-load 'dired
+;;   (define-key dired-mode-map (kbd "<return>") 'dired-find-alternate-file)
+;;   (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file))
 
 ;; (defun my/dired-open-current-buffer-directory ()
 ;;   "Open Dired in the directory of the current buffer's file."
@@ -207,8 +212,6 @@
 
 ;; ;; Bind the new function to C-x d
 ;; (global-set-key (kbd "C-x d") 'my/dired-open-current-buffer-directory)
-
-
 
 ;; msc
 (setq confirm-kill-processes nil
@@ -252,3 +255,55 @@
             (evil-normal-state)
           (insert "j" (string next-char)))))))
 (put 'dired-find-alternate-file 'disabled nil)
+
+;; TABS
+(tab-bar-mode 1)
+(setq tab-bar-show t)  
+(setq tab-bar-new-tab-choice
+      (lambda ()
+        (let ((buf (dired default-directory)))
+          (buffer-name buf))))
+(setq tab-bar-close-button-show nil
+      tab-bar-new-button-show nil)
+
+(global-set-key (kbd "C-c C-1")
+                (lambda ()
+                  (interactive)
+                  (tab-move -1)))  ; Move left
+
+(global-set-key (kbd "C-c C-2")
+                (lambda ()
+                  (interactive)
+                  (tab-move 1)))   ; Move right
+
+(global-set-key (kbd "C-c n") 'tab-new)       ; Create a new tab
+(global-set-key (kbd "C-c q") 'tab-close)     ; Close the current tab
+(global-set-key (kbd "C-2") 'tab-next)        ; Move to the next tab
+(global-set-key (kbd "C-1") 'tab-previous)    ; Move to the previous tab
+
+;; docview for pdf
+;; (setq doc-view-resolution 300)
+;; (add-hook 'doc-view-mode-hook #'doc-view-fit-width-to-window)
+;; (add-hook 'doc-view-mode-hook (lambda () (display-line-numbers-mode -1)))
+;; Use pdf-tools instead of doc-view for better performance
+(use-package pdf-tools
+  :ensure t
+  :config
+  (pdf-tools-install)
+  (setq-default pdf-view-display-size 'fit-page)
+  (setq pdf-view-continuous t) ;; Enable smooth scrolling
+  (add-hook 'pdf-view-mode-hook (lambda () (display-line-numbers-mode -1))) ;; Disable line numbers
+  (define-key pdf-view-mode-map (kbd "j") 'pdf-view-next-page)
+  (define-key pdf-view-mode-map (kbd "k") 'pdf-view-previous-page))
+
+;; Optimize doc-view-mode
+(use-package doc-view
+  :hook
+  ((doc-view-mode . (lambda () 
+                      (linum-mode -1)  ;; Disable line numbers
+                      (display-line-numbers-mode -1)
+                      (doc-view-continuous-scroll-mode 1)))) ;; Enable smooth scrolling
+  :custom
+  (doc-view-resolution 150) ;; Lower resolution for better speed
+  (doc-view-cache-directory "~/.cache/docview"))
+
