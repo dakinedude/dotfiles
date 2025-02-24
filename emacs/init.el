@@ -1,6 +1,6 @@
+;; -*- INTRODUCTION -*-
 (setq custom-file "~/.config/emacs/custom.el")
 (load custom-file)
-
 (setq evil-want-keybinding nil)
 
 (require 'package)
@@ -18,7 +18,27 @@
 (require 'use-package)
 (setq use-package-always-ensure t)
 
-;; Packages
+;; -*- PACKAGES -*-
+(use-package gruber-darker-theme)
+
+(use-package pdf-tools
+  :ensure t
+  :config
+  (pdf-tools-install)
+  (setq-default pdf-view-display-size 'fit-page)
+  (setq pdf-view-continuous t) 
+  (add-hook 'pdf-view-mode-hook (lambda () (display-line-numbers-mode -1)))
+  (define-key pdf-view-mode-map (kbd "j") 'pdf-view-next-page)
+  (define-key pdf-view-mode-map (kbd "k") 'pdf-view-previous-page))
+
+(use-package rust-mode
+  :ensure t
+  :hook (rust-mode . lsp))
+
+(use-package cargo
+  :ensure t
+  :hook (rust-mode . cargo-minor-mode))
+
 (use-package exec-path-from-shell
   :config
   (exec-path-from-shell-initialize))
@@ -28,16 +48,16 @@
   :init
   (setq lsp-auto-guess-root t))
 
-(use-package lsp-ui
-  :after lsp-mode
-  :hook (lsp-mode . lsp-ui-mode)
-  :init
-  (setq lsp-ui-doc-enable t
-        lsp-ui-doc-delay 2
-        lsp-ui-doc-position 'at-point
-        lsp-ui-sideline-enable nil
-        lsp-ui-sideline-show-diagnostics t
-        lsp-ui-sideline-show-code-actions t))
+ (use-package lsp-ui
+   :after lsp-mode
+   :hook (lsp-mode . lsp-ui-mode)
+   :init
+   (setq lsp-ui-doc-enable t
+         lsp-ui-doc-delay 2
+         lsp-ui-doc-position 'at-point
+         lsp-ui-sideline-show-diagnostics t
+         lsp-ui-sideline-show-code-actions t))
+(setq lsp-headerline-breadcrumb-enable nil)
 
 (use-package magit)
 
@@ -52,13 +72,10 @@
 
 (use-package vertico
   :init
-  (vertico-mode))
-
-(use-package savehist
-  :init
-  (savehist-mode))
-
-(use-package maude-mode)
+  (vertico-mode)
+  :config
+  (define-key vertico-map (kbd "C-j") 'vertico-next)
+  (define-key vertico-map (kbd "C-k") 'vertico-previous))
 
 (use-package marginalia
   :bind (:map minibuffer-local-map
@@ -66,14 +83,20 @@
   :init
   (marginalia-mode))
 
+(use-package savehist
+  :init
+  (savehist-mode))
+
+(use-package maude-mode)
+
 (use-package avy)
-(global-set-key (kbd "C-;") 'avy-goto-char-timer)
+(global-set-key (kbd "C-;") 'avy-goto-char)
 
 (use-package maude-mode)
 (autoload 'maude-mode "maude-mode" "Major mode for editing Maude code" t)
 (add-to-list 'auto-mode-alist '("\\.maude\\'" . maude-mode))
 
-;; Configure comint
+;; -*- MY FUNCTIONS -*-
 (add-hook 'shell-mode-hook 'my/shell-setup)
 (add-hook 'evil-insert-state-entry-hook 'my/shell-move-to-prompt)
 
@@ -110,7 +133,6 @@
                         (delq 'process-kill-buffer-query-function
                               kill-buffer-query-functions))))
 
-;; Custom Functions
 (defun load-config ()
   "Load the init.el config file."
   (interactive)
@@ -137,22 +159,19 @@
   (let ((class-name (file-name-sans-extension (file-name-nondirectory buffer-file-name))))
     (compile (concat "java " class-name))))
 
-;; Configurations
-(electric-pair-mode 1)
-(menu-bar-mode -1)
-(tool-bar-mode -1)
-(scroll-bar-mode -1)
-(global-display-line-numbers-mode)
+;; dired split window
+(defun my-dired-open-file-split-right ()
+  "In dired, open the file under the cursor in a new right split."
+  (interactive)
+  (let ((file (dired-get-file-for-visit)))
+    (when file
+      (split-window-right)
+      (other-window 1)
+      (find-file file))))
 
+(define-key dired-mode-map (kbd "C-<return>") #'my-dired-open-file-split-right)
 
-(setq-default tab-width 4
-              fill-column 79
-              truncate-lines t
-              inhibit-splash-screen t
-              auto-save-default nil
-              indent-tabs-mode nil)
-
-;; Keybindings
+;; -*- KEYBINDINGS -*-
 (global-set-key (kbd "C-`") 'shell)
 (global-set-key (kbd "C-<tab>") 'switch-buffer-clockwise)
 (global-set-key (kbd "C-c e") 'lsp-ui-doc-show)
@@ -167,7 +186,27 @@
 (global-set-key (kbd "<C-left>") 'shrink-window-horizontally)
 (global-set-key (kbd "<C-right>") 'enlarge-window-horizontally)
 
-;; Backup Settings
+;; -*- CONFIGURATIONS -*-
+(electric-pair-mode 1)
+(menu-bar-mode -1)
+(tool-bar-mode -1)
+(scroll-bar-mode -1)
+(global-display-line-numbers-mode)
+(setq transient-mark-mode nil)
+
+(setq-default tab-width 4
+              fill-column 79
+              truncate-lines t
+              inhibit-splash-screen t
+              auto-save-default nil
+              indent-tabs-mode nil)
+
+(setq default-directory "~/"
+      initial-buffer-choice (lambda () (dired default-directory)))
+
+(set-face-attribute 'default nil :family "Source Code Pro" :height 150)
+(set-fontset-font t 'unicode "Symbols Nerd Font Mono" nil 'append)
+
 (setq make-backup-files t
       backup-directory-alist '(("." . "~/.emacsbackups"))
       backups-by-copying t
@@ -175,18 +214,11 @@
       kept-new-versions 2
       kept-old-versions 2)
 
-;; Default Directory
-(setq default-directory "~/"
-      initial-buffer-choice (lambda () (dired default-directory)))
-
-;; Fonts
-(add-to-list 'default-frame-alist '(font . "Source Code Pro-16"))
-
-;; Org-Mode
+;; org
 (with-eval-after-load 'org
   (define-key org-mode-map (kbd "C-c C-t") 'org-cycle))
 
-;; Dired Settings
+;; dired
 (require 'dired-x)
 (setq dired-omit-files
       (rx (or (seq bol (? ".") "#")
@@ -198,22 +230,6 @@
           (lambda ()
             (dired-omit-mode 1)))
 
-;; (with-eval-after-load 'dired
-;;   (define-key dired-mode-map (kbd "<return>") 'dired-find-alternate-file)
-;;   (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file))
-
-;; (defun my/dired-open-current-buffer-directory ()
-;;   "Open Dired in the directory of the current buffer's file."
-;;   (interactive)
-;;   (let ((current-directory (if buffer-file-name
-;;                                (file-name-directory buffer-file-name)
-;;                              default-directory)))
-;;     (dired current-directory)))
-
-;; ;; Bind the new function to C-x d
-;; (global-set-key (kbd "C-x d") 'my/dired-open-current-buffer-directory)
-
-;; msc
 (setq confirm-kill-processes nil
       message-log-max nil
       initial-scratch-message nil
@@ -227,25 +243,7 @@
 (setq ido-create-new-buffer 'always)
 (setq ido-enable-flex-matching t)
 
-;; Scratch Buffer
-(defvar scratch-file (expand-file-name "scratch.txt" user-emacs-directory))
-
-(defun save-scratch-buffer ()
-  "Save the content of the *scratch* buffer to a file."
-  (when (get-buffer "*scratch*")
-    (with-current-buffer "*scratch*"
-      (write-region (point-min) (point-max) scratch-file))))
-
-(defun load-scratch-buffer ()
-  "Load the content of the *scratch* buffer from a file."
-  (when (file-exists-p scratch-file)
-    (with-current-buffer (get-buffer-create "*scratch*")
-      (insert-file-contents scratch-file))))
-
-(add-hook 'kill-emacs-hook 'save-scratch-buffer)
-(add-hook 'emacs-startup-hook 'load-scratch-buffer)
-
-;; JJ for Evil Mode
+;; jj for evil
 (with-eval-after-load 'evil
   (define-key evil-insert-state-map (kbd "j")
     (lambda ()
@@ -256,7 +254,7 @@
           (insert "j" (string next-char)))))))
 (put 'dired-find-alternate-file 'disabled nil)
 
-;; TABS
+;; tabs
 (tab-bar-mode 1)
 (setq tab-bar-show t)  
 (setq tab-bar-new-tab-choice
@@ -269,41 +267,25 @@
 (global-set-key (kbd "C-c C-1")
                 (lambda ()
                   (interactive)
-                  (tab-move -1)))  ; Move left
+                  (tab-move -1))) 
 
 (global-set-key (kbd "C-c C-2")
                 (lambda ()
                   (interactive)
-                  (tab-move 1)))   ; Move right
+                  (tab-move 1)))   
 
-(global-set-key (kbd "C-c n") 'tab-new)       ; Create a new tab
-(global-set-key (kbd "C-c q") 'tab-close)     ; Close the current tab
-(global-set-key (kbd "C-2") 'tab-next)        ; Move to the next tab
-(global-set-key (kbd "C-1") 'tab-previous)    ; Move to the previous tab
+(global-set-key (kbd "C-c n") 'tab-new)       
+(global-set-key (kbd "C-c q") 'tab-close)    
+(global-set-key (kbd "C-2") 'tab-next)      
+(global-set-key (kbd "C-1") 'tab-previous) 
 
-;; docview for pdf
-;; (setq doc-view-resolution 300)
-;; (add-hook 'doc-view-mode-hook #'doc-view-fit-width-to-window)
-;; (add-hook 'doc-view-mode-hook (lambda () (display-line-numbers-mode -1)))
-;; Use pdf-tools instead of doc-view for better performance
-(use-package pdf-tools
-  :ensure t
-  :config
-  (pdf-tools-install)
-  (setq-default pdf-view-display-size 'fit-page)
-  (setq pdf-view-continuous t) ;; Enable smooth scrolling
-  (add-hook 'pdf-view-mode-hook (lambda () (display-line-numbers-mode -1))) ;; Disable line numbers
-  (define-key pdf-view-mode-map (kbd "j") 'pdf-view-next-page)
-  (define-key pdf-view-mode-map (kbd "k") 'pdf-view-previous-page))
 
-;; Optimize doc-view-mode
-(use-package doc-view
-  :hook
-  ((doc-view-mode . (lambda () 
-                      (linum-mode -1)  ;; Disable line numbers
-                      (display-line-numbers-mode -1)
-                      (doc-view-continuous-scroll-mode 1)))) ;; Enable smooth scrolling
-  :custom
-  (doc-view-resolution 150) ;; Lower resolution for better speed
-  (doc-view-cache-directory "~/.cache/docview"))
-
+;; (use-package doc-view
+  ;; :hook
+  ;; ((doc-view-mode . (lambda () 
+                      ;; (linum-mode -1)  
+                      ;; (display-line-numbers-mode -1)
+                      ;; (doc-view-continuous-scroll-mode 1)))) 
+  ;; :custom
+  ;; (doc-view-resolution 150) 
+  ;; (doc-view-cache-directory "~/.cache/docview"))
