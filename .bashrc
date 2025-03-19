@@ -8,5 +8,10 @@ alias lsl='ls -l'
 alias grep='grep --color=auto'
 alias fgrep='fgrep --color=auto'
 alias egrep='egrep --color=auto'
-PS1='\[\e[1;33m\]\u@\h\[\e[0m\] \[\e[1;34m\]\w\[\e[0m\] \$ '
-export PATH=$PATH:/usr/local/bin
+alias sshuio='ssh -J matande@login.uio.no matande@login.ifi.uio.no'
+export PS1='\w/ '
+
+[ -f "/home/mats/.ghcup/env" ] && . "/home/mats/.ghcup/env" # ghcup-env
+. "$HOME/.cargo/env"
+
+export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin

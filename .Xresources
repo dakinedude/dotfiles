@@ -1,0 +1,37 @@
+! xterm*faceName: Source Code Pro
+! xterm*faceSize: 17
+! xterm*dynamicTitle: false
+! xterm*background: #181818
+! xterm*foreground: #FFFFFF
+! XTerm*metaSendsEscape: true
+
+Xft.dpi:    96
+Xft.antialias:  1
+Xft.hinting:    1
+Xft.hintstyle:  hintmedium
+
+URxvt.termName: rxvt
+URxvt*depth: 32
+URxvt.transparent: false
+URxvt.font: xft:Source Code Pro:size=18
+URxvt.scrollBar: false
+URxvt.internalBorder: 5
+
+URxvt*foreground: #e4e4ef
+URxvt*background: #181818
+URxvt*color0:  #2E3436
+URxvt*color1:  #a40000
+URxvt*color2:  #4E9A06
+URxvt*color3:  #C4A000
+URxvt*color4:  #3465A4
+URxvt*color5:  #75507B
+URxvt*color6:  #ce5c00
+URxvt*color7:  #babdb9
+URxvt*color8:  #555753
+URxvt*color9:  #EF2929
+URxvt*color10: #8AE234
+URxvt*color11: #FCE94F
+URxvt*color12: #729FCF
+URxvt*color13: #AD7FA8
+URxvt*color14: #fcaf3e
+URxvt*color15: #EEEEEC

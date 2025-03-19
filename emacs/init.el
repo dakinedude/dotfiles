@@ -1,7 +1,109 @@
-;; -*- INTRODUCTION -*-
-(setq custom-file "~/.config/emacs/custom.el")
-(load custom-file)
-(setq evil-want-keybinding nil)
+(set-language-environment "UTF-8")
+(prefer-coding-system 'utf-8)
+
+(menu-bar-mode -1)
+(tool-bar-mode -1)
+(scroll-bar-mode -1)
+(electric-pair-mode 1)
+(column-number-mode 1)
+(fset 'yes-or-no-p 'y-or-n-p)
+(ido-mode 1)
+(blink-cursor-mode 0)
+
+(setq auto-revert-interval 1
+      create-lockfiles nil
+      echo-keystrokes 0.3
+      enable-recursive-minibuffers t
+      frame-inhibit-implied-resize t
+      inhibit-startup-screen t
+      initial-scratch-message ";; Life is clockwork. Doubt is sand.\n"
+      recentf-max-saved-items 1000
+      ring-bell-function 'ignore
+      sentence-end-double-space nil
+      custom-file (concat user-emacs-directory "custom.el")
+      ido-everywhere t
+      isearch-lazy-count t
+      ido-create-new-buffer 'always
+      ido-enable-flex-matching t
+      initial-buffer-choice (lambda () (dired "~")))
+
+(setq-default tab-width 4
+              fill-column 90
+              truncate-lines t
+              indent-tabs-mode nil
+              split-width-threshold 160
+              split-height-threshold nil
+              frame-resize-pixelwise t
+              auto-fill-function 'do-auto-fill
+              buffer-file-coding-system 'utf-8-unix)
+
+;; (setq evil-want-keybinding nil)
+
+;; (use-package evil
+;;   :config
+;;   (evil-mode 1))
+
+;; (use-package evil-collection
+;;   :after evil
+;;   :config
+;;   (evil-collection-init))
+
+;; (with-eval-after-load 'evil
+;;   (define-key evil-insert-state-map (kbd "j")
+;;     (lambda ()
+;;       (interactive)
+;;       (let ((next-char (read-key "j")))
+;;         (if (equal next-char ?j)
+;;             (evil-normal-state)
+;;           (insert "j" (string next-char)))))))
+;; (put 'dired-find-alternate-file 'disabled nil)
+
+(require 'dired-x)
+(setq dired-omit-files "^\\.")
+(add-hook 'dired-mode-hook (lambda () (dired-omit-mode)))
+(with-eval-after-load 'dired
+  (define-key dired-mode-map (kbd "<backspace>") 'dired-up-directory)
+  (define-key dired-mode-map (kbd "b") 'dired-up-directory))
+
+(tab-bar-mode 1)
+(setq tab-bar-show 1
+      tab-bar-close-button-show nil
+      tab-bar-new-button-show nil
+      tab-bar-new-tab-choice (lambda () (dired ".")))
+
+(defun switch-window-clockwise ()
+  (interactive)
+  (other-window 1))
+
+(defun switch-window-counterclockwise ()
+  (interactive)
+  (other-window -1))
+
+(global-set-key (kbd "C-1") 'switch-window-counterclockwise)
+(global-set-key (kbd "C-2") 'switch-window-clockwise)
+(global-set-key (kbd "C-c C-1") (lambda () (interactive) (tab-move -1))) 
+(global-set-key (kbd "C-c C-2") (lambda () (interactive) (tab-move 1)))   
+(global-set-key (kbd "C-c n") 'tab-new)       
+(global-set-key (kbd "C-c q") 'tab-close)    
+(global-set-key (kbd "M-2") 'tab-next)      
+(global-set-key (kbd "M-1") 'tab-previous) 
+(global-set-key (kbd "<C-up>") 'shrink-window)
+(global-set-key (kbd "<C-down>") 'enlarge-window)
+(global-set-key (kbd "<C-left>") 'shrink-window-horizontally)
+(global-set-key (kbd "<C-right>") 'enlarge-window-horizontally)
+(global-set-key (kbd "C-w") 'backward-kill-word)
+(global-set-key (kbd "C-h") 'delete-backward-char)  
+(global-set-key (kbd "M-C-h") 'backward-kill-word)
+(global-set-key (kbd "C-x C-k") 'kill-region)
+(global-set-key (kbd "M-n") 'forward-paragraph)
+(global-set-key (kbd "M-p") 'backward-paragraph)
+
+
+(defvar emacs-autosave-directory
+  (concat user-emacs-directory "autosaves/"))
+
+(setq backup-directory-alist `((".*" . ,emacs-autosave-directory))
+      auto-save-file-name-transforms `((".*" ,emacs-autosave-directory t)))
 
 (require 'package)
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
@@ -18,274 +120,90 @@
 (require 'use-package)
 (setq use-package-always-ensure t)
 
-;; -*- PACKAGES -*-
-(use-package gruber-darker-theme)
-
-(use-package pdf-tools
+(use-package gruber-darker-theme
   :ensure t
-  :config
-  (pdf-tools-install)
-  (setq-default pdf-view-display-size 'fit-page)
-  (setq pdf-view-continuous t) 
-  (add-hook 'pdf-view-mode-hook (lambda () (display-line-numbers-mode -1)))
-  (define-key pdf-view-mode-map (kbd "j") 'pdf-view-next-page)
-  (define-key pdf-view-mode-map (kbd "k") 'pdf-view-previous-page))
-
-(use-package rust-mode
-  :ensure t
-  :hook (rust-mode . lsp))
-
-(use-package cargo
-  :ensure t
-  :hook (rust-mode . cargo-minor-mode))
-
-(use-package exec-path-from-shell
-  :config
-  (exec-path-from-shell-initialize))
-
-(use-package lsp-mode
-  :hook ((go-mode . lsp-deferred))
   :init
-  (setq lsp-auto-guess-root t))
+  (load-theme 'gruber-darker t))
 
- (use-package lsp-ui
-   :after lsp-mode
-   :hook (lsp-mode . lsp-ui-mode)
-   :init
-   (setq lsp-ui-doc-enable t
-         lsp-ui-doc-delay 2
-         lsp-ui-doc-position 'at-point
-         lsp-ui-sideline-show-diagnostics t
-         lsp-ui-sideline-show-code-actions t))
-(setq lsp-headerline-breadcrumb-enable nil)
+(set-face-attribute 'default nil
+                    :family "Source Code Pro"
+                    :height 140)
 
-(use-package magit)
+(dolist (mode
+         '(abbrev-mode
+           column-number-mode
+           delete-selection-mode
+           dirtrack-mode
+           global-auto-revert-mode
+           global-so-long-mode
+           recentf-mode
+           show-paren-mode))
+  (funcall mode 1))
 
-(use-package evil
-  :config
-  (evil-mode 1))
-
-(use-package evil-collection
-  :after evil
-  :config
-  (evil-collection-init))
+(use-package magit
+  :ensure t)
 
 (use-package vertico
+  :ensure t
   :init
-  (vertico-mode)
+  (vertico-mode 1)
   :config
-  (define-key vertico-map (kbd "C-j") 'vertico-next)
-  (define-key vertico-map (kbd "C-k") 'vertico-previous))
-
-(use-package marginalia
-  :bind (:map minibuffer-local-map
-         ("M-A" . marginalia-cycle))
-  :init
-  (marginalia-mode))
+  (setq vertico-count 5))
 
 (use-package savehist
+  :ensure t
   :init
-  (savehist-mode))
+  (savehist-mode 1))
 
-(use-package maude-mode)
+(use-package vterm
+  :ensure t
+  :hook (vterm-mode . (lambda ()
+                        (define-key vterm-mode-map (kbd "M-1") nil)
+                        (define-key vterm-mode-map (kbd "M-2") nil))))
 
-(use-package avy)
-(global-set-key (kbd "C-;") 'avy-goto-char)
+(use-package pdf-tools
+  :defer t
+  :mode "\\.pdf\\'"
+  :bind (:map pdf-view-mode-map
+              ("c" . (lambda ()
+                       (interactive)
+                       (if header-line-format
+                           (setq header-line-format nil)
+                         (nano-modeline-pdf-mode))))
+              ("j" . pdf-view-next-line-or-next-page)
+              ("k" . pdf-view-previous-line-or-previous-page))
+  :hook (pdf-view-mode
+         . (lambda ()
+             (nano-modeline-pdf-mode)))
+  :init (pdf-loader-install)
+  :config (add-to-list 'revert-without-query '(".pdf")))
 
-(use-package maude-mode)
-(autoload 'maude-mode "maude-mode" "Major mode for editing Maude code" t)
-(add-to-list 'auto-mode-alist '("\\.maude\\'" . maude-mode))
+(use-package avy
+  :ensure t
+  :bind ("C-<tab>" . avy-goto-char-timer))
 
-;; -*- MY FUNCTIONS -*-
-(add-hook 'shell-mode-hook 'my/shell-setup)
-(add-hook 'evil-insert-state-entry-hook 'my/shell-move-to-prompt)
+(use-package go-mode
+  :defer t
+  :mode "\\.go\\'"
+  :hook (go-mode . eglot-ensure)
+  :config
+  (setq gofmt-command "goimports")
+  (add-hook 'before-save-hook 'gofmt-before-save))
 
-(defun my/shell-setup ()
-  "Set shell buffer to read-only except for the prompt."
-  (setq comint-prompt-read-only t)  ;; readonly
-  (setq-local scroll-conservatively 101)  ;; autoscroll
-  (add-hook 'comint-preoutput-filter-functions
-            'ansi-color-apply nil t))  ;; color
+(use-package maude-mode
+  :defer t
+  :mode "\\.maude\\'")
 
-(defun my/shell-move-to-prompt ()
-  "Automatically move cursor to prompt line in shell mode."
-  (when (derived-mode-p 'shell-mode)
-    (goto-char (process-mark (get-buffer-process (current-buffer))))))
+(use-package eglot
+  :ensure nil
+  :hook ((go-mode . eglot-ensure)
+         (c-mode . eglot-ensure))
+  :config
+  (setq eglot-autoshutdown t)
+  (add-to-list 'eglot-server-programs '(go-mode . ("gopls")))
+  (setq eglot-ignored-server-capabilities '(:documentHighlightProvider)))
 
-;; shell and compilation on bottom v
-(setq display-buffer-alist
-      '(("\\*shell\\*\\|\\*compilation\\*\\|\\*Maude\\*"
-         (display-buffer-reuse-window display-buffer-in-side-window)
-         (side . bottom)
-         (window-height . 0.23))))
+(with-eval-after-load 'eglot
+  (define-key eglot-mode-map (kbd "C-c h") #'eldoc))
 
-;; always kill shell without asking
-(add-hook 'shell-mode-hook
-          (lambda ()
-            (setq-local kill-buffer-query-functions
-                        (delq 'process-kill-buffer-query-function
-                              kill-buffer-query-functions))))
-
-;; always kill compilation without asking doesnt work when exitiing emacs
-(add-hook 'compilation-mode-hook
-          (lambda ()
-            (setq-local kill-buffer-query-functions
-                        (delq 'process-kill-buffer-query-function
-                              kill-buffer-query-functions))))
-
-(defun load-config ()
-  "Load the init.el config file."
-  (interactive)
-  (load-file (expand-file-name "~/.config/emacs/init.el")))
-
-(defun switch-buffer-clockwise ()
-  "Switch to the next buffer in a clockwise manner."
-  (interactive)
-  (let ((windows (window-list)))
-    (select-window (car (last windows)))
-    (bury-buffer (current-buffer))
-    (select-window (car windows))
-    (other-window 1)))
-
-(defun my-java-compile ()
-  "Compile the current Java file."
-  (interactive)
-  (let ((compile-command (concat "javac " (buffer-file-name))))
-    (compile compile-command)))
-
-(defun my-java-run ()
-  "Run the compiled Java class."
-  (interactive)
-  (let ((class-name (file-name-sans-extension (file-name-nondirectory buffer-file-name))))
-    (compile (concat "java " class-name))))
-
-;; dired split window
-(defun my-dired-open-file-split-right ()
-  "In dired, open the file under the cursor in a new right split."
-  (interactive)
-  (let ((file (dired-get-file-for-visit)))
-    (when file
-      (split-window-right)
-      (other-window 1)
-      (find-file file))))
-
-(define-key dired-mode-map (kbd "C-<return>") #'my-dired-open-file-split-right)
-
-;; -*- KEYBINDINGS -*-
-(global-set-key (kbd "C-`") 'shell)
-(global-set-key (kbd "C-<tab>") 'switch-buffer-clockwise)
-(global-set-key (kbd "C-c e") 'lsp-ui-doc-show)
-;; (global-set-key (kbd "C-2") 'next-buffer)
-;; (global-set-key (kbd "C-1") 'previous-buffer)
-(add-hook 'java-mode-hook
-          (lambda ()
-            (local-set-key (kbd "C-c C-c") 'my-java-compile)
-            (local-set-key (kbd "C-c C-r") 'my-java-run)))
-(global-set-key (kbd "<C-up>") 'shrink-window)
-(global-set-key (kbd "<C-down>") 'enlarge-window)
-(global-set-key (kbd "<C-left>") 'shrink-window-horizontally)
-(global-set-key (kbd "<C-right>") 'enlarge-window-horizontally)
-
-;; -*- CONFIGURATIONS -*-
-(electric-pair-mode 1)
-(menu-bar-mode -1)
-(tool-bar-mode -1)
-(scroll-bar-mode -1)
-(global-display-line-numbers-mode)
-(setq transient-mark-mode nil)
-
-(setq-default tab-width 4
-              fill-column 79
-              truncate-lines t
-              inhibit-splash-screen t
-              auto-save-default nil
-              indent-tabs-mode nil)
-
-(setq default-directory "~/"
-      initial-buffer-choice (lambda () (dired default-directory)))
-
-(set-face-attribute 'default nil :family "Source Code Pro" :height 150)
-(set-fontset-font t 'unicode "Symbols Nerd Font Mono" nil 'append)
-
-(setq make-backup-files t
-      backup-directory-alist '(("." . "~/.emacsbackups"))
-      backups-by-copying t
-      delete-old-versions t
-      kept-new-versions 2
-      kept-old-versions 2)
-
-;; org
-(with-eval-after-load 'org
-  (define-key org-mode-map (kbd "C-c C-t") 'org-cycle))
-
-;; dired
-(require 'dired-x)
-(setq dired-omit-files
-      (rx (or (seq bol (? ".") "#")
-              (seq bol "." (not (any ".")))
-              (seq "~" eol)
-              (seq bol "CVS" eol))))
-
-(add-hook 'dired-mode-hook
-          (lambda ()
-            (dired-omit-mode 1)))
-
-(setq confirm-kill-processes nil
-      message-log-max nil
-      initial-scratch-message nil
-      inhibit-startup-message t)
-
-(kill-buffer "*Messages*")
-
-;; ido mode
-(ido-mode 1)
-(setq ido-everywhere t)
-(setq ido-create-new-buffer 'always)
-(setq ido-enable-flex-matching t)
-
-;; jj for evil
-(with-eval-after-load 'evil
-  (define-key evil-insert-state-map (kbd "j")
-    (lambda ()
-      (interactive)
-      (let ((next-char (read-key "j")))
-        (if (equal next-char ?j)
-            (evil-normal-state)
-          (insert "j" (string next-char)))))))
-(put 'dired-find-alternate-file 'disabled nil)
-
-;; tabs
-(tab-bar-mode 1)
-(setq tab-bar-show t)  
-(setq tab-bar-new-tab-choice
-      (lambda ()
-        (let ((buf (dired default-directory)))
-          (buffer-name buf))))
-(setq tab-bar-close-button-show nil
-      tab-bar-new-button-show nil)
-
-(global-set-key (kbd "C-c C-1")
-                (lambda ()
-                  (interactive)
-                  (tab-move -1))) 
-
-(global-set-key (kbd "C-c C-2")
-                (lambda ()
-                  (interactive)
-                  (tab-move 1)))   
-
-(global-set-key (kbd "C-c n") 'tab-new)       
-(global-set-key (kbd "C-c q") 'tab-close)    
-(global-set-key (kbd "C-2") 'tab-next)      
-(global-set-key (kbd "C-1") 'tab-previous) 
-
-
-;; (use-package doc-view
-  ;; :hook
-  ;; ((doc-view-mode . (lambda () 
-                      ;; (linum-mode -1)  
-                      ;; (display-line-numbers-mode -1)
-                      ;; (doc-view-continuous-scroll-mode 1)))) 
-  ;; :custom
-  ;; (doc-view-resolution 150) 
-  ;; (doc-view-cache-directory "~/.cache/docview"))
+(load-file custom-file)
