@@ -28,3 +28,10 @@
   "go to ~ in dired"
   (interactive)
   (dired (expand-file-name "~")))
+
+(defun jump-to-matching-paren ()
+  (interactive)
+  (cond
+   ((looking-at-p "\\s(") (forward-sexp 1))
+   ((looking-back "\\s)" 1) (backward-sexp 1))
+   (t (message "Not at a parenthesis"))))

@@ -79,7 +79,9 @@
          ("M-v"       . scroll-up-command)
          ("C-a"       . smarter-move-beginning-of-line)
          ("C-x C-r"   . #'recentf-open-files)
-         ("M-m"       . move-beginning-of-line)))
+         ("M-m"       . move-beginning-of-line)
+         ("C-q"       . jump-to-matching-paren)
+         ("C-z"         . vterm)))
 
 (use-package dired-x
   :ensure nil
