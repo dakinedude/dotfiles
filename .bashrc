@@ -1,3 +1,5 @@
+shopt -s expand_aliases
+
 force_color_prompt=yes
 alias ls='ls --color=auto'
 alias py='python3'
@@ -15,3 +17,7 @@ export PS1='\w/ '
 . "$HOME/.cargo/env"
 
 export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin
+
+#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
+export SDKMAN_DIR="$HOME/.sdkman"
+[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"

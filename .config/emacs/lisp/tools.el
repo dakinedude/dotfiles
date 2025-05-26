@@ -1,19 +1,16 @@
-(provide 'tools)
-
 (use-package multiple-cursors
   :bind (("C-`"   . mc/edit-lines)
          ("C->"   . mc/mark-next-like-this)
          ("C-<"   . mc/mark-previous-like-this)
          ("C-c C-<". mc/mark-all-like-this)))
 
-(use-package geiser-chez
-  :ensure t)
+(use-package geiser-racket
+  :commands geiser-mode)
 
 (use-package geiser
-  :after geiser-chez
   :custom
-  (geiser-active-implementations '(chez))
-  (geiser-chez-binary "/usr/bin/scheme"))
+  (geiser-active-implementations '(racket))
+  (geiser-racket-binary "/usr/bin/racket"))
 
 (use-package magit
   :commands magit-status
@@ -68,3 +65,5 @@
 
 (use-package markdown-mode
   :mode ("\\.md\\'" . markdown-mode))
+
+(provide 'tools)

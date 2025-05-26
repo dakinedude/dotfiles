@@ -1,5 +1,3 @@
-(provide 'core)
-
 (setq custom-file (concat user-emacs-directory "custom.el"))
 (load custom-file 'noerror)
 
@@ -71,7 +69,6 @@
          ("C-w"       . backward-kill-word)
          ("C-h"       . delete-backward-char)
          ("M-C-h"     . backward-kill-word)
-         ("C-x C-k"   . kill-region)
          ("M-n"       . forward-paragraph)
          ("M-p"       . backward-paragraph)
          ("<f1>"      . vterm)
@@ -81,7 +78,7 @@
          ("C-x C-r"   . #'recentf-open-files)
          ("M-m"       . move-beginning-of-line)
          ("C-q"       . jump-to-matching-paren)
-         ("C-z"         . vterm)))
+         ("C-z"       . kill-region)))
 
 (use-package dired-x
   :ensure nil
@@ -121,3 +118,6 @@
   :config
   (setq recentf-max-saved-items 2000)
   (recentf-mode 1))
+
+(provide 'core)
+

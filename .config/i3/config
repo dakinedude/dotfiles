@@ -15,6 +15,10 @@ set $mod Mod4
 # is used in the bar {} block below.
 font pango:Source Code Pro 12
 
+
+
+exec --no-startup-id trayer --edge top --align right --SetDockType true --SetPartialStrut true --expand true --widthtype request --transparent true --tint 0x000000 --height 24
+
 # This font is widely installed, provides lots of unicode glyphs, right-to-left
 # text rendering and scalability on retina/hidpi displays (thanks to pango).
 #font pango:DejaVu Sans Mono 8
@@ -22,6 +26,10 @@ font pango:Source Code Pro 12
 # Start XDG autostart .desktop files using dex. See also
 # https://wiki.archlinux.org/index.php/XDG_Autostart
 exec --no-startup-id dex --autostart --environment i3
+
+# TASTATUR
+bindsyn $mod+Shift+n exec "setxkbmap -layout no,us"
+bindsyn $mod+Shift+u exec "setxkbmap -layout us,no"
 
 # The combination of xss-lock, nm-applet and pactl is a popular choice, so
 # they are included here as an example. Modify as you see fit.
@@ -49,10 +57,13 @@ floating_modifier $mod
 tiling_drag modifier titlebar
 
 # start a terminal
-bindsym $mod+Return exec xterm
+bindsym $mod+Return exec rxvt
 
 # start emacs
-bindsym $mod+o exec emacs
+bindsym $mod+o exec em
+
+# start firefox
+bindsym $mod+i exec firefox
 
 # kill focused window
 bindsym $mod+Shift+q kill
@@ -104,10 +115,10 @@ bindsym $mod+w layout tabbed
 bindsym $mod+e layout toggle split
 
 # toggle tiling / floating
-bindsym $mod+Shift+space floating toggle
+#bindsym $mod+Shift+space floating toggle
 
 # change focus between tiling / floating windows
-bindsym $mod+space focus mode_toggle
+# bindsym $mod+space focus mode_toggle
 
 # focus the parent container
 bindsym $mod+a focus parent
@@ -189,7 +200,8 @@ bindsym $mod+r mode "resize"
 # Start i3bar to display a workspace bar (plus the system information i3status
 # finds out, if available)
 bar {
-        status_command i3status
+    status_command i3status
+    # status_command bash -c 'while read -r line; do echo "$( /home/mats/programming/go/prayi3/prayi3.sh ) | $line"; done < <(i3status)'
 }
 
 # picom against screentear
@@ -205,3 +217,5 @@ exec --no-startup-id blueman-applet
 
 # shift mod del to turn off comp
 bindsym Shift+Mod4+Delete exec --no-startup-id sudo systemctl poweroff
+
+for_window [class="javalin"] floating enable, resize set to default, move position center
