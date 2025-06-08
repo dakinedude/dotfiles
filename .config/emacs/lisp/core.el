@@ -1,5 +1,6 @@
 (setq custom-file (concat user-emacs-directory "custom.el"))
 (load custom-file 'noerror)
+(add-to-list 'exec-path (expand-file-name "~/go/bin"))
 
 (set-language-environment "UTF-8")
 (prefer-coding-system 'utf-8)
