@@ -3,17 +3,15 @@
 (add-to-list 'exec-path (expand-file-name "~/go/bin"))
 
 (require 'package)
-(setq package-enable-at-startup nil)
-(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
-(package-initialize)
-
-(unless package-archive-contents
-  (package-refresh-contents))
+(setq package-archives '(("melpa" . "https://melpa.org/packages/")
+                         ("gnu"   . "https://elpa.gnu.org/packages/")))
+(unless package--initialized (package-initialize))
 
 (unless (package-installed-p 'use-package)
+  (package-refresh-contents)
   (package-install 'use-package))
 
-(require 'use-package)
+(eval-when-compile (require 'use-package))
 (setq use-package-always-ensure t)
 
 (set-language-environment "UTF-8")
