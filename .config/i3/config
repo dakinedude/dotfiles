@@ -20,7 +20,7 @@ tiling_drag modifier titlebar
 
 bindsym $mod+Return exec rxvt
 
-bindsym $mod+o exec emacs
+bindsym $mod+o exec em
 
 bindsym $mod+i exec firefox
 

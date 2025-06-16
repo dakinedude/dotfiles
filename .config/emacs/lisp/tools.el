@@ -55,13 +55,23 @@
   :mode "\\.maude\\'")
 
 (use-package eglot
-  :hook ((go-mode . eglot-ensure)
-         (c-mode  . eglot-ensure))
-  :bind (:map eglot-mode-map ("C-c h" . eldoc))
+  :hook ((java-mode . eglot-ensure))
   :custom
   (eglot-autoshutdown t)
-  (eglot-server-programs '((go-mode . ("gopls"))))
-  (eglot-ignored-server-capabilities '(:documentHighlightProvider)))
+  (eglot-server-programs
+   '((java-mode .
+      ("java"
+       "-Declipse.application=org.eclipse.jdt.ls.core.id1"
+       "-Dosgi.bundles.defaultStartLevel=4"
+       "-Declipse.product=org.eclipse.jdt.ls.core.product"
+       "-Dlog.protocol=true"
+       "-Dlog.level=ALL"
+       "-Xmx1G"
+       "-jar" "/home/mats/.local/share/jdtls/plugins/org.eclipse.equinox.launcher_1.6.400.v20210924-0641.jar"
+       "-configuration" "/home/mats/.local/share/jdtls/config_linux"
+       "-data" "/tmp/jdtls-workspace"))))
+  :bind (:map eglot-mode-map
+              ("C-c h" . eldoc)))
 
 (use-package markdown-mode
   :mode ("\\.md\\'" . markdown-mode))

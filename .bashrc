@@ -11,7 +11,8 @@ alias grep='grep --color=auto'
 alias fgrep='fgrep --color=auto'
 alias egrep='egrep --color=auto'
 alias sshuio='ssh -J matande@login.uio.no matande@login.ifi.uio.no'
-
+alias em='emacsclient -c -a ""'
+alias emt='emacs -nw -Q'
 export PS1='\w/ '
 
 [ -f "$HOME/.ghcup/env" ] && . "$HOME/.ghcup/env"  # ghcup-env
@@ -22,3 +23,5 @@ export PATH="$PATH:/usr/local/go/bin:$HOME/go/bin"
 # THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
 export SDKMAN_DIR="$HOME/.sdkman"
 [[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && source "$SDKMAN_DIR/bin/sdkman-init.sh"
+
+export PATH="$HOME/bin:$PATH"

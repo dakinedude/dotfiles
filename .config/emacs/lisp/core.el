@@ -12,6 +12,7 @@
 (fset 'yes-or-no-p 'y-or-n-p)
 (blink-cursor-mode 0)
 (global-subword-mode 1)
+(global-superword-mode 1)
 
 (setq use-package-always-ensure t
       auto-revert-interval 1
