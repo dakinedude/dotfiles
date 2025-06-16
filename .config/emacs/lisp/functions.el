@@ -24,17 +24,28 @@
   (dired (expand-file-name "~")))
 
 (defun jump-to-matching-paren ()
+  "Jump to the closest parenthesis, or to its match if already at one."
   (interactive)
   (cond
+   ;; If at opening paren, jump forward to match
    ((looking-at-p "\\s(") (forward-sexp 1))
+   ;; If just after closing paren, jump backward to match
    ((looking-back "\\s)" 1) (backward-sexp 1))
+   ;; Else: jump to closest paren (open or close)
    (t
-    (let ((pos (save-excursion
-                 (when (re-search-backward "\\s(\\|\\s)" nil t)
-                   (point)))))
-      (if pos
-          (goto-char pos)
-        (message "No nearby parenthesis found"))))))
+    (let* ((back (save-excursion
+                   (when (re-search-backward "\\s(\\|\\s)" nil t)
+                     (point))))
+           (fwd (save-excursion
+                  (when (re-search-forward "\\s(\\|\\s)" nil t)
+                    (point)))))
+      (cond
+       ((and back (or (not fwd) (< (- (point) back) (- fwd (point)))))
+        (goto-char back))
+       (fwd
+        (goto-char fwd))
+       (t
+        (message "No nearby parenthesis found")))))))
 
 (defun load-config ()
   "Reload init.el and all .el files in the lisp/ folder using `load-file`."
