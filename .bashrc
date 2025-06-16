@@ -12,7 +12,7 @@ alias fgrep='fgrep --color=auto'
 alias egrep='egrep --color=auto'
 alias sshuio='ssh -J matande@login.uio.no matande@login.ifi.uio.no'
 alias em='emacsclient -c -a ""'
-alias emt='emacs -nw -Q'
+alias emt='emacs -nw'
 export PS1='\w/ '
 
 [ -f "$HOME/.ghcup/env" ] && . "$HOME/.ghcup/env"  # ghcup-env

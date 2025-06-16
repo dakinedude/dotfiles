@@ -2,6 +2,20 @@
 (load custom-file 'noerror)
 (add-to-list 'exec-path (expand-file-name "~/go/bin"))
 
+(require 'package)
+(setq package-enable-at-startup nil)
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+(package-initialize)
+
+(unless package-archive-contents
+  (package-refresh-contents))
+
+(unless (package-installed-p 'use-package)
+  (package-install 'use-package))
+
+(require 'use-package)
+(setq use-package-always-ensure t)
+
 (set-language-environment "UTF-8")
 (prefer-coding-system 'utf-8)
 (menu-bar-mode -1)
