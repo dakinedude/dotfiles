@@ -1,5 +1,5 @@
 xterm*faceName: Source Code Pro
-xterm*faceSize: 17
+xterm*faceSize: 15
 xterm*dynamicTitle: false
 xterm*background: #181818
 xterm*foreground: #FFFFFF
@@ -13,7 +13,7 @@ Xft.hintstyle:  hintmedium
 URxvt.termName: rxvt
 URxvt*depth: 32
 URxvt.transparent: false
-URxvt.font: xft:Source Code Pro:size=18
+URxvt.font: xft:Source Code Pro:size=15
 URxvt.scrollBar: false
 URxvt.internalBorder: 5
 
