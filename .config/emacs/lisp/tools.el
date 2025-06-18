@@ -41,37 +41,39 @@
 (use-package avy
   :bind ("C-<tab>" . avy-goto-char-timer))
 
+(use-package eglot
+  :hook ((java-mode . eglot-ensure)
+         (go-mode . eglot-ensure)
+         (c-mode . eglot-ensure))
+  :config
+  (setq eglot-send-changes-idle-time 1)
+  (add-to-list
+   'eglot-server-programs
+   `(java-mode . ("java"
+                  "-Declipse.application=org.eclipse.jdt.ls.core.id1"
+                  "-Dosgi.bundles.defaultStartLevel=4"
+                  "-Declipse.product=org.eclipse.jdt.ls.core.product"
+                  "-Dlog.level=ALL"
+                  "-Xmx1G"
+                  "-jar" "/home/mats/.local/share/jdtls/plugins/org.eclipse.equinox.launcher_1.6.400.v20210924-0641.jar"
+                  "-configuration" "/home/mats/.local/share/jdtls/config_linux"
+                  "-data" ,(expand-file-name "~/.jdtls-workspace"))))
+  (add-to-list 'eglot-server-programs
+               '(go-mode . ("~/go/bin/gopls"))))
+
+
 (use-package go-mode
   :mode "\\.go\\'"
-  :hook ((go-mode . eglot-ensure)
-         (go-mode . (lambda ()
+  :hook ((go-mode . (lambda ()
                       (setq-local gofmt-command "gofmt")
                       (add-hook 'before-save-hook #'gofmt-before-save nil t))))
-  :custom (gofmt-command "gofmt"))
+  :custom
+  (gofmt-command "gofmt"))
 
 (use-package maude-mode
   :ensure nil
   :load-path "lisp"
   :mode "\\.maude\\'")
-
-(use-package eglot
-  :hook ((java-mode . eglot-ensure))
-  :custom
-  (eglot-autoshutdown t)
-  (eglot-server-programs
-   '((java-mode .
-      ("java"
-       "-Declipse.application=org.eclipse.jdt.ls.core.id1"
-       "-Dosgi.bundles.defaultStartLevel=4"
-       "-Declipse.product=org.eclipse.jdt.ls.core.product"
-       "-Dlog.protocol=true"
-       "-Dlog.level=ALL"
-       "-Xmx1G"
-       "-jar" "/home/mats/.local/share/jdtls/plugins/org.eclipse.equinox.launcher_1.6.400.v20210924-0641.jar"
-       "-configuration" "/home/mats/.local/share/jdtls/config_linux"
-       "-data" "/tmp/jdtls-workspace"))))
-  :bind (:map eglot-mode-map
-              ("C-c h" . eldoc)))
 
 (use-package markdown-mode
   :mode ("\\.md\\'" . markdown-mode))

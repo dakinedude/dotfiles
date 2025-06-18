@@ -106,7 +106,8 @@
   :bind
   (:map dired-mode-map
         ("<backspace>" . dired-up-directory)
-        ("b"            . dired-up-directory)))
+        ("b"           . dired-up-directory)
+        ("C-j"         . dired-do-find-marked-files)))
 
 (use-package tab-bar
   :ensure nil
