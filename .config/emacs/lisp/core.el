@@ -1,6 +1,8 @@
 (setq custom-file (concat user-emacs-directory "custom.el"))
 (load custom-file 'noerror)
-(add-to-list 'exec-path (expand-file-name "~/go/bin"))
+(setenv "PATH" (concat (getenv "PATH") ":/usr/local/go/bin:" (getenv "HOME") "/go/bin"))
+(add-to-list 'exec-path "/usr/local/go/bin")
+(add-to-list 'exec-path (concat (getenv "HOME") "/go/bin"))
 
 (require 'package)
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
