@@ -4,13 +4,13 @@
          ("C-<"   . mc/mark-previous-like-this)
          ("C-c C-<". mc/mark-all-like-this)))
 
-(use-package geiser-racket
-  :commands geiser-mode)
-
 (use-package geiser
   :custom
-  (geiser-active-implementations '(racket))
-  (geiser-racket-binary "/usr/bin/racket"))
+  (geiser-active-implementations '(mit)))
+
+(use-package geiser-mit
+  :custom
+  (geiser-mit-binary "/usr/bin/mit-scheme"))
 
 (use-package magit
   :commands magit-status
